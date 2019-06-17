@@ -90,7 +90,24 @@ final class PhotoCollectionViewController: UICollectionViewController {
 // MARK: - Private Methods
 private extension PhotoCollectionViewController {
   func showOrHideNavPrompt() {
-    // Implement me!
+    // 1
+    let delayInSeconds = 2.0
+    
+    // 2
+    DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) { [weak self] in
+      guard let self = self else {
+        return
+      }
+      
+      if PhotoManager.shared.photos.count > 0 {
+        self.navigationItem.prompt = nil
+      } else {
+        self.navigationItem.prompt = "Add photos with faces to Googlyify them!"
+      }
+      
+      // 3
+      self.navigationController?.viewIfLoaded?.setNeedsLayout()
+    }
   }
   
   func downloadImageAssets() {
