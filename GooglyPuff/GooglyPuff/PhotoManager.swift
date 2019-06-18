@@ -78,20 +78,56 @@ final class PhotoManager {
   
   func downloadPhotos(withCompletion completion: BatchPhotoDownloadingCompletionClosure?) {
     var storedError: NSError?
+    
+    let downloadGroup = DispatchGroup()
     for address in [PhotoURLString.overlyAttachedGirlfriend,
                     PhotoURLString.successKid,
                     PhotoURLString.lotsOfFaces] {
                       let url = URL(string: address)
+                      downloadGroup.enter()
                       let photo = DownloadPhoto(url: url!) { _, error in
                         if error != nil {
                           storedError = error
                         }
+                        downloadGroup.leave()
                       }
                       PhotoManager.shared.addPhoto(photo)
     }
     
-    completion?(storedError)
+    downloadGroup.notify(queue: DispatchQueue.main, work: DispatchWorkItem(block: {
+      completion?(storedError)
+    }))
   }
+  
+  func downloadPhotos_wait(withCompletion completion: BatchPhotoDownloadingCompletionClosure?) {
+    DispatchQueue.global(qos: .userInteractive).async {
+      var storedError: NSError?
+      
+      let downloadGroup = DispatchGroup()
+      for address in [PhotoURLString.overlyAttachedGirlfriend,
+                      PhotoURLString.successKid,
+                      PhotoURLString.lotsOfFaces] {
+                        let url = URL(string: address)
+                        
+                        downloadGroup.enter()
+                        let photo = DownloadPhoto(url: url!) { _, error in
+                          if error != nil {
+                            storedError = error
+                          }
+                          
+                          downloadGroup.leave()
+                        }
+                        PhotoManager.shared.addPhoto(photo)
+      }
+      
+      downloadGroup.wait()
+      
+      DispatchQueue.main.async {
+        completion?(storedError)
+      }
+    }
+  }
+
   
   private func postContentAddedNotification() {
     NotificationCenter.default.post(name: PhotoManagerNotification.contentAdded, object: nil)

@@ -1,4 +1,4 @@
-### Concurrency
+## Concurrency
 
 iOS 中一个应用进程可以有多个线程。操作系统管理每个线程，每个线程都**可以**并发地执行，但是操作系统决定是否会同时执行，什么时候，以及如何实现。
 
@@ -18,7 +18,7 @@ GCD 根据系统和可用的系统资源来决定有多少个并行。
 
 >concurrency is about *structure* while parallelism is about *execution*
 
-### Queues
+## Queues
 
 GCD 以 FIFO 的顺序执行添加进队列的任务，保证先添加进队列的任务比后添加进队列的任务先**开始**执行。
 
@@ -50,7 +50,7 @@ GCD 提供三种主要类型的队列：
 4. **Utility**: 长时间运行的任务，典型的应用是用户可见的进度指示器。可用于计算、I/O、网络、持续数据流等。对应 `low` 优先级全局队列。
 5. **Background**: 用户没有意识到的任务。可用于预加载、维护、其它的无用户交互的/非是时间敏感的任务。对应 `background` 优先级的全局队列。
 
-### Synchronous vs. Asynchronous
+## Synchronous vs. Asynchronous
 
 同步方法在任务完成之后将控制返回给调用者。
 
@@ -68,13 +68,13 @@ GCD 提供三种主要类型的队列：
 2. **Global Queue**: 可用在 dispatch barrier 中同步任务，或者等待一个任务完成之后再进行其它的操作
 3. **Custom Serial Queue**: 注意死锁
 
-### Managing Tasks
+## Managing Tasks
 
 GCD 用闭包的方式添加任务，每个提交给 `DispatchQueue` 的任务都是一个 `DispatchWorkItem` 。
 
 可以设置  `DispatchWorkItem` 的 `QoS` 或者是否产生新的线程等。
 
-### Delaying Task Execution
+## Delaying Task Execution
 
 用于希望任务在特定时间运行的时候。
 
@@ -107,7 +107,7 @@ DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) { [weak self] i
 2. Timer 依赖于 runloop，所以使用 Timer 需要保证它被添加进正确的 runloop mode。
 3. Timer 更适合用在需要重复的任务
 
-### Handling the Readers-Writers Problem
+## Handling the Readers-Writers Problem
 
 可以通过 dispatch barriers 解决[Readers-Writers Problem](http://en.wikipedia.org/wiki/Readers–writers_problem)
 
@@ -132,3 +132,34 @@ barrier 解决了写的问题，在同一个队列进行读操作，但是使用
 > 如果在执行的队列上调用 sync 会导致死锁
 >
 > sync 会等待闭包执行完成，但是闭包在当前执行的闭包调用完成之前不会调用完成或者调用，但是当前执行的闭包又在等待 sync 的闭包调用结束。
+
+## Dispatch Groups
+
+dispatch group 可以将多个任务组合在一起，然后**等待**所有的任务完成或者在所有的任务完成之后得到**通知**。
+
+一个组中的任务可以是同步的或者异步的，并且可以运行在不同的队列中。
+
+`DispatchGroup` 来管理 dispatch groups。
+
+### **wait** 
+
+这个方法会阻塞当前线程直到所有入队到组中的任务都完成
+
+1. 由于会阻塞当前线程，所有应该使用 GCD 的 `async` 方法和后台队列来保证不会阻塞主线程
+2. 创建一个组
+3. 在每个任务开始前调用组的 `enter` 方法，在每个任务结束的时候调用组的 `leave` 方法，两个方法调用必须匹配
+4. 调用组的 `wait` 方法来阻塞当前线程直到所有的任务都完成(都调用了 `leave`)。或者调用 `wait(timeout:)` 来指定超时时间。
+5. `wait` 之后的调用是所有的任务都结束了或者超时了，可以处理任务之后的数据。
+
+### **notify**
+
+使用这个方法可以在在所有组中的任务完成之后得到通知，并且不会像 `wait` 方法一样阻塞当前线程，并且可以在 `notify` 方法中指定接收通知的队列。
+
+1. 创建一个 `DispatchGroup`
+2. 在任务开始前调用组的 `enter` 方法，在任务结束之后调用组的 `leave` 方法，同样两个方法的调用需要匹配
+3. 调用组的 `notify(queue:work:)` 方法指定接收通知的队列和后续的处理
+
+## Concurrency Looping
+
+
+
