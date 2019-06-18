@@ -161,5 +161,41 @@ dispatch group 可以将多个任务组合在一起，然后**等待**所有的�
 
 ## Concurrency Looping
 
+`DispatchQueue.concurrentPerform(iterations:execute:)` 可以并发地执行遍历，它是同步的，会在所有的遍历任务完成后退出
 
+> 需要注意遍历迭代的次数和每次迭代的工作量，如果迭代次数很多并且每次迭代的工作量很小会造成很多开销以至于抵消并发迭代的收益。**striding** 的技术可以帮助我们避免这种情况，striding 可以让我们在一次迭代中做多个部分的任务
+
+**什么时候使用**
+
+1. 可以排除串行队列，因为根本没有益处
+2. 在包含循环的并发队列中使用是一种好的选择，尤其是当你需要追踪进度的时候
+
+```swift
+// 仅为示例，下面的情况并不合适用并发遍历
+
+var storedError: NSError?
+let downloadGroup = DispatchGroup()
+let addresses = [PhotoURLString.overlyAttachedGirlfriend,
+                 PhotoURLString.successKid,
+                 PhotoURLString.lotsOfFaces]
+// 告诉GCD使用QoS为 .userInitiated的队列来实现并发调用
+let _ = DispatchQueue.global(qos: .userInitiated)
+DispatchQueue.concurrentPerform(iterations: addresses.count) { index in
+  let address = addresses[index]
+  let url = URL(string: address)
+  downloadGroup.enter()
+  let photo = DownloadPhoto(url: url!) { _, error in
+    if error != nil {
+      storedError = error
+    }
+    downloadGroup.leave()
+  }
+  PhotoManager.shared.addPhoto(photo)
+}
+downloadGroup.notify(queue: DispatchQueue.main) {
+  completion?(storedError)
+}
+```
+
+## Canceling Dispatch Blocks
 
