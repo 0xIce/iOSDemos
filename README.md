@@ -199,3 +199,13 @@ downloadGroup.notify(queue: DispatchQueue.main) {
 
 ## Canceling Dispatch Blocks
 
+GCD 的任务以闭包的形式派发，实际是一个 `DispatchWorkItem`，取消就是用到了 `DispatchWorkItem` 来发挥作用
+
+>  **取消必须在任务到达队列的头开始执行之前**。
+
+1. 使用 `DispatchWorkItem(qos:flags:block:)` 创建一个对象，`flags` 可以指定 `.inheritQoS` 来使用派发到的队列的 QoS
+2. 派发所有创建的 `DispatchWorkItem` 到一个队列执行，可利用串行队列的特性保证后续的取消操作的在任务开始之前执行
+3. 调用 `DispatchWorkItem` 的 `cancel` 方法来取消任务的执行，并调用组的 `leave` 方法
+
+配合[代码](GooglyPuff/GooglyPuff/PhotoManager.swift)享用，更多参考 [Apple's documentation](https://developer.apple.com/documentation/dispatch/dispatchworkitem)
+

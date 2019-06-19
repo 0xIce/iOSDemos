@@ -80,6 +80,58 @@ final class PhotoManager {
     var storedError: NSError?
     
     let downloadGroup = DispatchGroup()
+    var addresses = [PhotoURLString.overlyAttachedGirlfriend,
+                     PhotoURLString.successKid,
+                     PhotoURLString.lotsOfFaces]
+    
+    // 1
+    addresses += addresses + addresses
+    
+    // 2
+    var blocks = [DispatchWorkItem]()
+    
+    for address in addresses {
+      downloadGroup.enter()
+      
+      // 3
+      let block = DispatchWorkItem(flags: .inheritQoS) {
+        let url = URL(string: address)
+        let photo = DownloadPhoto(url: url!) { _, error in
+          if error != nil {
+            storedError = error
+          }
+          downloadGroup.leave()
+        }
+        PhotoManager.shared.addPhoto(photo)
+      }
+      blocks.append(block)
+      
+      // 4
+      DispatchQueue.main.async(execute: block)
+    }
+    
+    // 5
+    for block in blocks[3..<blocks.count] {
+      // 6
+      let cancel = Bool.random()
+      if cancel {
+        // 7
+        block.cancel()
+        
+        // 8
+        downloadGroup.leave()
+      }
+    }
+    
+    downloadGroup.notify(queue: DispatchQueue.main, work: DispatchWorkItem(block: {
+      completion?(storedError)
+    }))
+  }
+  
+  func downloadPhotos_concurrency(withCompletion completion: BatchPhotoDownloadingCompletionClosure?) {
+    var storedError: NSError?
+    
+    let downloadGroup = DispatchGroup()
     let addresses = [PhotoURLString.overlyAttachedGirlfriend,
                      PhotoURLString.successKid,
                      PhotoURLString.lotsOfFaces]
