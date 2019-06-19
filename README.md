@@ -4,7 +4,7 @@
 
 ## Contents
 
-| About | Input                   |
+| Project | Input                   |
 | :----- | :-------------------------- |
 |   GCD   | [tutorial](GCD/tutorial.md) |
 
