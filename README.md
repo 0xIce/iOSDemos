@@ -4,7 +4,7 @@
 
 ## 目录
 
-| Project | Learn                       |
+| About | Input                   |
 | :----- | :-------------------------- |
 |   GCD   | [tutorial](GCD/tutorial.md) |
 
