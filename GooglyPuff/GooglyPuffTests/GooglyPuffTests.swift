@@ -46,6 +46,23 @@ class GooglyPuffTests: XCTestCase {
   }
   
   func downloadImageURL(withString urlString: String) {
-    XCTFail("Not implemented!")
+    let url = URL(string: urlString)
+    
+    // 1
+    let semaphore = DispatchSemaphore(value: 0)
+    let _ = DownloadPhoto(url: url!) { _, error in
+      if let error = error {
+        XCTFail("\(urlString) failed. \(error.localizedDescription)")
+      }
+      
+      // 2
+      semaphore.signal()
+    }
+    let timeout = DispatchTime.now() + .seconds(defaultTimeoutLengthInSeconds)
+    
+    // 3
+    if semaphore.wait(timeout: timeout) == .timedOut {
+      XCTFail("\(urlString) timed out")
+    }
   }
 }

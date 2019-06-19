@@ -209,3 +209,72 @@ GCD 的任务以闭包的形式派发，实际是一个 `DispatchWorkItem`，取
 
 配合[代码](GooglyPuff/GooglyPuff/PhotoManager.swift)享用，更多参考 [Apple's documentation](https://developer.apple.com/documentation/dispatch/dispatchworkitem)
 
+## Miscellaneous GCD Fun
+
+### Semaphores
+
+信号量问题讨论参考 [detailed discussion](https://greenteapress.com/wp/semaphores/) 和  [Dining Philosophers Problem](http://en.wikipedia.org/wiki/Dining_philosophers_problem)
+
+1. 创建一个信号量并指定初始值，这个值代表可以同时访问的数量
+2. 当一个访问结束的时候，调用信号量的 `signal` 方法增加信号量的值
+3. 调用信号量的 `wait` 方法阻塞当前线程直到信号量的值大于0即资源可访问，`wait` 方法还可以指定超时时间。信号量的返回值是枚举，`success` 或者 `timeout`
+
+### Dispatch Sources
+
+dispatch sources 可以用来监听一些事件，包括 Unix signals、file descriptors、Mach ports、VFS Nodes等
+
+**设置 dispatch source**
+
+1. 设置要监听的事件类型、接收事件回调的 dispatch queue
+2. 将事件 handler 赋值给 dispatch source
+3. 前两步完成后 dispatch source 处于 suspended 状态，从而允许我们进行进一步的设置，比如设置 event handler。设置完成后，调用 source 的 `resume` 方法开始事件处理
+
+**一个🌰**
+
+```swift
+// 1
+#if DEBUG
+
+  // 2
+  var signal: DispatchSourceSignal?
+
+  // 3
+  private let setupSignalHandlerFor = { (_ object: AnyObject) in
+    let queue = DispatchQueue.main
+
+    // 4
+    signal =
+      DispatchSource.makeSignalSource(signal: SIGSTOP, queue: queue)
+        
+    // 5
+    signal?.setEventHandler {
+      print("Hi, I am: \(object.description!)")
+    }
+
+    // 6
+    signal?.resume()
+  }
+#endif
+
+// 在viewDidLoad中调用
+#if DEBUG
+  setupSignalHandlerFor(self)
+#endif
+```
+
+DEBUG 模式中，点击 Xcode debug 栏中的 pause 和 continue 可以看到输出信息
+
+**应用场景猜想**
+
+1. 做 app 防护，防止攻击者 attache debugger 到 app 上
+
+2. 做堆栈追踪工具，方便找到想在 debugger 中操作的对象
+
+3. 辅助调试，还是上面的🌰，在 EventHandler 的 print 方法上增加断点，则可以在 app 运行的任意时刻通过 pause 和 continue 进入到此断点，然后进行进一步的调试
+
+   ```swift
+   expression let $vc = unsafeBitCast(0x7fd301d0a310, to: GooglyPuff.PhotoCollectionViewController.self)
+   expression $vc.navigationItem.prompt = "WOOT!"
+   ```
+
+   
