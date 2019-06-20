@@ -279,4 +279,4 @@ DEBUG 模式中，点击 Xcode debug 栏中的 pause 和 continue 可以看到�
 
 ## Reference
 
-1. 不完全翻译自 raywenderlich 的 grand-central-dispatch-tutorial-for-swift-4 [part-1](https://www.raywenderlich.com/5370-grand-central-dispatch-tutorial-for-swift-4-part-1-2)  [part-2](https://www.raywenderlich.com/5371-grand-central-dispatch-tutorial-for-swift-4-part-2-2)
+1. 不完整翻译自 raywenderlich 的 grand-central-dispatch-tutorial-for-swift-4 [part-1](https://www.raywenderlich.com/5370-grand-central-dispatch-tutorial-for-swift-4-part-1-2)  [part-2](https://www.raywenderlich.com/5371-grand-central-dispatch-tutorial-for-swift-4-part-2-2)
