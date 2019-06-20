@@ -27,3 +27,15 @@ Operation 是构建于 GCD 之上的，更高级别的封装。
 
    > 在耗时操作开始前检查任务是否被取消是一个好的习惯
 
+## Suspend and Cancel Operation
+
+可以设置 `OperationQueue` 的 `isSuspended` 属性为 `true` 或 `false` 来暂停/开始任务，不可以对单独的任务设置
+
+调用 `Operation` 的 `cancel` 方法取消任务的执行
+
+## Dependency
+
+可以调用 `Operation` 的 `addDependency(op:)` 和 `removeDependency(op:)` 方法来添加和移除依赖
+
+> 一个被依赖的任务被取消的时候，依赖的任务依旧会执行，就像被依赖的任务正常完成一样
+

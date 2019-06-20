@@ -72,7 +72,9 @@ class ListViewController: UITableViewController {
       cell.textLabel?.text = "Failed to load"
     case .new, .downloaded:
       indicator.startAnimating()
-      startOperations(for: photoDetails, at: indexPath)
+      if !tableView.isDragging && !tableView.isDecelerating {
+        startOperations(for: photoDetails, at: indexPath)
+      }
     }
     
     return cell
@@ -195,5 +197,66 @@ class ListViewController: UITableViewController {
     
     pendingOperations.filtrationsInProgress[indexPath] = filterer
     pendingOperations.filtrationQueue.addOperation(filterer)
+  }
+  
+  func suspendAllOperations() {
+    pendingOperations.downloadQueue.isSuspended = true
+    pendingOperations.filtrationQueue.isSuspended = true
+  }
+  
+  func resumeAllOperations() {
+    pendingOperations.downloadQueue.isSuspended = false
+    pendingOperations.filtrationQueue.isSuspended = false
+  }
+  
+  func loadImagesForOnscreenCells() {
+    guard let pathsArray = tableView.indexPathsForVisibleRows else {
+      return
+    }
+    
+    var allPendingOperations = Set(pendingOperations.downloadsInProgress.keys)
+    allPendingOperations.formUnion(pendingOperations.filtrationsInProgress.keys)
+    
+    var toBeCancelled = allPendingOperations
+    let visiblePaths = Set(pathsArray)
+    toBeCancelled.subtract(visiblePaths) // 所有正在进行的任务减去不可见的cell
+    
+    var toBeStarted = visiblePaths
+    toBeStarted.subtract(allPendingOperations) // 所有可见的cell，减去已经在进行的任务
+    
+    for indexPath in toBeCancelled {
+      if let pendingDownload = pendingOperations.downloadsInProgress[indexPath] {
+        pendingDownload.cancel()
+      }
+      pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
+      if let pendingFiltration = pendingOperations.filtrationsInProgress[indexPath] {
+        pendingFiltration.cancel()
+      }
+      pendingOperations.filtrationsInProgress.removeValue(forKey: indexPath)
+    }
+    
+    for indexPath in toBeStarted {
+      let recordToProcess = photos[indexPath.row]
+      startOperations(for: recordToProcess, at: indexPath)
+    }
+  }
+}
+
+// MARK: - ScrollView Delegate
+extension ListViewController {
+  override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+    suspendAllOperations()
+  }
+  
+  override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    if !decelerate {
+      loadImagesForOnscreenCells()
+      resumeAllOperations()
+    }
+  }
+  
+  override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    loadImagesForOnscreenCells()
+    resumeAllOperations()
   }
 }
