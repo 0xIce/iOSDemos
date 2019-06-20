@@ -39,3 +39,7 @@ Operation 是构建于 GCD 之上的，更高级别的封装。
 
 > 一个被依赖的任务被取消的时候，依赖的任务依旧会执行，就像被依赖的任务正常完成一样
 
+## Reference
+
+1. 不完全翻译自 [raywenderlich](https://www.raywenderlich.com/5293-operation-and-operationqueue-tutorial-in-swift)
+
