@@ -4,7 +4,7 @@
 
 ## Contents
 
-| Project | Input                   |
+| Series | Input                   |
 | :----- | :-------------------------- |
 |   GCD   | [tutorial](GCD/tutorial.md) |
 | Operation | [tutorial](Opetaion/tutorial.md) |
