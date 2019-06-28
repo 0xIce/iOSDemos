@@ -28,7 +28,7 @@
 
 import Foundation
 
-class ScaryCreatureData: NSObject, NSCoding {
+class ScaryCreatureData: NSObject, NSCoding, NSSecureCoding {
   enum Keys: String {
     case title = "Title"
     case rating = "Rating"
@@ -44,13 +44,17 @@ class ScaryCreatureData: NSObject, NSCoding {
   }
   
   required convenience init?(coder aDecoder: NSCoder) {
-    let title = aDecoder.decodeObject(forKey: Keys.title.rawValue) as! String
-    let rating = aDecoder.decodeFloat(forKey: Keys.rating.rawValue)
-    self.init(title: title, rating: rating)
+    let title = aDecoder.decodeObject(of: NSString.self, forKey: Keys.title.rawValue) as String? ?? ""
+    let rating = aDecoder.decodeObject(of: NSNumber.self, forKey: Keys.rating.rawValue)
+    self.init(title: title as String, rating: rating?.floatValue ?? 0)
   }
   
   func encode(with aCoder: NSCoder) {
-    aCoder.encode(title, forKey: Keys.title.rawValue)
-    aCoder.encode(rating, forKey: Keys.rating.rawValue)
+    aCoder.encode(title as NSString, forKey: Keys.title.rawValue)
+    aCoder.encode(NSNumber(value: rating), forKey: Keys.rating.rawValue)
+  }
+  
+  static var supportsSecureCoding: Bool {
+    return true
   }
 }

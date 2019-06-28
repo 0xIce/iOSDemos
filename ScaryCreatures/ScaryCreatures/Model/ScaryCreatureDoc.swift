@@ -117,7 +117,7 @@ class ScaryCreatureDoc: NSObject {
     
     let dataURL = docPath!.appendingPathComponent(Keys.dataFile.rawValue)
     
-    let codedData = try! NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: false)
+    let codedData = try! NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: true)
     
     do {
       try codedData.write(to: dataURL)
