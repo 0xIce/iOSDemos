@@ -62,15 +62,16 @@ class MasterViewController: UITableViewController {
   // MARK: - Preloading Data
   
   func loadCreatures() {
-    let creature1 = ScaryCreatureDoc(title: "Ghost", rating: 5, thumbImage: #imageLiteral(resourceName: "ghostThumb"), fullImage: #imageLiteral(resourceName: "ghost"))
-    let creature2 = ScaryCreatureDoc(title: "Monster", rating: 5, thumbImage: #imageLiteral(resourceName: "monsterThumb"), fullImage: #imageLiteral(resourceName: "monster"))
-    let creature3 = ScaryCreatureDoc(title: "Panda", rating: 1, thumbImage: #imageLiteral(resourceName: "pandaThumb"), fullImage: #imageLiteral(resourceName: "panda"))
-    let creature4 = ScaryCreatureDoc(title: "Red Bug", rating: 3, thumbImage: #imageLiteral(resourceName: "redBugThumb"), fullImage: #imageLiteral(resourceName: "redBug"))
-    let creature5 = ScaryCreatureDoc(title: "Slug", rating: 4, thumbImage: #imageLiteral(resourceName: "slugThumb"), fullImage: #imageLiteral(resourceName: "slug"))
-    let creature6 = ScaryCreatureDoc(title: "Spider", rating: 3, thumbImage: #imageLiteral(resourceName: "spiderThumb"), fullImage: #imageLiteral(resourceName: "spider"))
-    let creature7 = ScaryCreatureDoc(title: "Yeti", rating: 3, thumbImage: #imageLiteral(resourceName: "yetiThumb"), fullImage: #imageLiteral(resourceName: "yeti"))
-
-    creatures = [creature1, creature2, creature3, creature4, creature5, creature6, creature7]
+//    let creature1 = ScaryCreatureDoc(title: "Ghost", rating: 5, thumbImage: #imageLiteral(resourceName: "ghostThumb"), fullImage: #imageLiteral(resourceName: "ghost"))
+//    let creature2 = ScaryCreatureDoc(title: "Monster", rating: 5, thumbImage: #imageLiteral(resourceName: "monsterThumb"), fullImage: #imageLiteral(resourceName: "monster"))
+//    let creature3 = ScaryCreatureDoc(title: "Panda", rating: 1, thumbImage: #imageLiteral(resourceName: "pandaThumb"), fullImage: #imageLiteral(resourceName: "panda"))
+//    let creature4 = ScaryCreatureDoc(title: "Red Bug", rating: 3, thumbImage: #imageLiteral(resourceName: "redBugThumb"), fullImage: #imageLiteral(resourceName: "redBug"))
+//    let creature5 = ScaryCreatureDoc(title: "Slug", rating: 4, thumbImage: #imageLiteral(resourceName: "slugThumb"), fullImage: #imageLiteral(resourceName: "slug"))
+//    let creature6 = ScaryCreatureDoc(title: "Spider", rating: 3, thumbImage: #imageLiteral(resourceName: "spiderThumb"), fullImage: #imageLiteral(resourceName: "spider"))
+//    let creature7 = ScaryCreatureDoc(title: "Yeti", rating: 3, thumbImage: #imageLiteral(resourceName: "yetiThumb"), fullImage: #imageLiteral(resourceName: "yeti"))
+//
+//    creatures = [creature1, creature2, creature3, creature4, creature5, creature6, creature7]
+    creatures = ScaryCreatureDatabase.loadScaryCreatureDocs()
   }
   
   // MARK: - Table View
