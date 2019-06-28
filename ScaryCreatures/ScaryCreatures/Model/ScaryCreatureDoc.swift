@@ -29,9 +29,22 @@
 import UIKit
 
 class ScaryCreatureDoc: NSObject {
+  enum Keys: String {
+    case dataFile = "Data.plist"
+    case thumbImageFile = "thumbImage.png"
+    case fullImageFile = "fullImage.png"
+  }
+  
   private var _data: ScaryCreatureData?
   var data: ScaryCreatureData? {
     get {
+      if _data != nil { return _data }
+      
+      let dataURL = docPath!.appendingPathComponent(Keys.dataFile.rawValue)
+      guard let codedData = try? Data(contentsOf: dataURL) else { return nil }
+      
+      _data = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(codedData) as? ScaryCreatureData
+      
       return _data
     }
     set {
@@ -42,7 +55,13 @@ class ScaryCreatureDoc: NSObject {
   private var _thumbImage: UIImage?
   var thumbImage: UIImage? {
     get {
-       return _thumbImage
+      if _thumbImage != nil { return _thumbImage }
+      if docPath == nil { return nil }
+      
+      let thumbImageURL = docPath!.appendingPathComponent(Keys.thumbImageFile.rawValue)
+      guard let imageData = try? Data(contentsOf: thumbImageURL) else { return nil }
+      _thumbImage = UIImage(data: imageData)
+      return _thumbImage
     }
     set {
       _thumbImage = newValue
@@ -52,7 +71,12 @@ class ScaryCreatureDoc: NSObject {
   private var _fullImage: UIImage?
   var fullImage: UIImage? {
     get {
-       return _fullImage
+      if _fullImage != nil { return _thumbImage }
+      if docPath == nil { return nil }
+      let fullImageURL = docPath!.appendingPathComponent(Keys.fullImageFile.rawValue)
+      guard let imageData = try? Data(contentsOf: fullImageURL) else { return nil }
+      _fullImage = UIImage(data: imageData)
+      return _fullImage
     }
     set {
       _fullImage = newValue
@@ -64,5 +88,50 @@ class ScaryCreatureDoc: NSObject {
     _data = ScaryCreatureData(title: title, rating: rating)
     self.thumbImage = thumbImage
     self.fullImage = fullImage
+    saveData()
+  }
+  
+  var docPath: URL?
+  init(docPath: URL?) {
+    super.init()
+    self.docPath = docPath
+  }
+  
+  func createDataPath() throws {
+    guard docPath == nil else { return }
+    
+    docPath = ScaryCreatureDatabase.nextScaryCreatureDocPath()
+    try FileManager.default.createDirectory(at: docPath!, withIntermediateDirectories: true, attributes: nil)
+  }
+  
+  func saveData() {
+    guard let data = data else { return }
+    
+    do {
+      try createDataPath()
+    } catch {
+      print("Couldn't create save folder: " + error.localizedDescription)
+      return
+    }
+    
+    let dataURL = docPath!.appendingPathComponent(Keys.dataFile.rawValue)
+    
+    let codedData = try! NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: false)
+    
+    do {
+      try codedData.write(to: dataURL)
+    } catch {
+      print("Couldn't write to save file: " + error.localizedDescription)
+    }
+  }
+  
+  func deleteDoc() {
+    if let docPath = docPath {
+      do {
+        try FileManager.default.removeItem(at: docPath)
+      } catch {
+        print("Error Deleting Folder: " + error.localizedDescription)
+      }
+    }
   }
 }

@@ -95,7 +95,8 @@ class MasterViewController: UITableViewController {
   
   override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
-      creatures.remove(at: indexPath.row)
+      let creatureToDelete = creatures.remove(at: indexPath.row)
+      creatureToDelete.deleteDoc()
       tableView.deleteRows(at: [indexPath], with: .fade)
     }
   }
