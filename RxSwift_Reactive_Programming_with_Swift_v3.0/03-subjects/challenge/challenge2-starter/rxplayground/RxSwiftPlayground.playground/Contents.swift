@@ -14,8 +14,14 @@ example(of: "BehaviorRelay") {
   let disposeBag = DisposeBag()
   
   // Create userSession BehaviorRelay of type UserSession with initial value of .loggedOut
+  let sessionRelay = BehaviorRelay<UserSession>(value: UserSession.loggedOut)
 
   // Subscribe to receive next events from userSession
+  sessionRelay
+    .subscribe(onNext: { (session) in
+      print(String(describing: session))
+    })
+    .disposed(by: disposeBag) // 又被遗忘了
   
   func logInWith(username: String, password: String, completion: (Error?) -> Void) {
     guard username == "johnny@appleseed.com",
@@ -25,17 +31,20 @@ example(of: "BehaviorRelay") {
     }
     
     // Update userSession
-    
+    sessionRelay.accept(.loggedIn)
   }
   
   func logOut() {
     // Update userSession
-    
+    sessionRelay.accept(.loggedOut)
   }
   
   func performActionRequiringLoggedInUser(_ action: () -> Void) {
     // Ensure that userSession is loggedIn and then execute action()
-    
+    guard sessionRelay.value == .loggedIn else {
+      return
+    }
+    action()
   }
   
   for i in 1...2 {
